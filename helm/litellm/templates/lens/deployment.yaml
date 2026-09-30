@@ -41,7 +41,11 @@ spec:
               drop: [ALL]
           env:
             - name: LITELLM_URL
-              value: {{ .Values.lensWorker.url | default (printf "http://%s:%v" (include "litellm.backend.fullname" .) .Values.backend.service.port) | quote }}
+              {{- $controlUrl := printf "http://%s:%v" (include "litellm.backend.fullname" .) .Values.backend.service.port }}
+              {{- if .Values.monolith.enabled }}
+              {{- $controlUrl = printf "http://%s:%v" (include "litellm.fullname" .) .Values.gateway.service.port }}
+              {{- end }}
+              value: {{ .Values.lensWorker.url | default $controlUrl | quote }}
             - name: LITELLM_LENS_SERVICE_TOKEN
               valueFrom:
                 secretKeyRef:
