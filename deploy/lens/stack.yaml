@@ -11,7 +11,10 @@ services:
         from urllib.parse import quote
         postgres_password = quote(os.environ["POSTGRES_PASSWORD"], safe="")
         os.environ["DATABASE_URL"] = f"postgresql://litellm:{postgres_password}@db:5432/litellm"
-        os.execv("docker/prod_entrypoint.sh", ["docker/prod_entrypoint.sh", *sys.argv[1:]])
+        entrypoint = "/app/docker-entrypoint.sh"
+        if not os.path.exists(entrypoint):
+            entrypoint = "/app/docker/prod_entrypoint.sh"
+        os.execv(entrypoint, [entrypoint, *sys.argv[1:]])
     command: ["--config", "/app/lens-config.yaml", "--port", "4000"]
     environment:
       LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:?Set a strong master key}
