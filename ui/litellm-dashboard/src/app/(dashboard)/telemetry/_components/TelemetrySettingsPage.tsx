@@ -105,7 +105,9 @@ export default function TelemetrySettingsPage() {
             <Activity />
             Telemetry
           </PageHeaderTitle>
-          <PageHeaderDescription>Choose which aggregated usage counts this proxy shares</PageHeaderDescription>
+          <PageHeaderDescription>
+            Choose what privacy-safe, aggregated usage data this proxy shares
+          </PageHeaderDescription>
           <PageHeaderControls>
             <PageTabsList>
               <PageTabsTrigger value="proxy">Proxy requests</PageTabsTrigger>
