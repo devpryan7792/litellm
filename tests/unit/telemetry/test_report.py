@@ -17,7 +17,6 @@ def test_attempt_and_ui_event_rows_serialize_with_merged_counts() -> None:
         provider="bedrock",
         provider_status=StatusClass.SERVER_ERROR,
         stream=True,
-        latency_ms=40.0,
         deployment_hash="abc",
         latency_to_first_token_ms=None,
     )
@@ -25,7 +24,6 @@ def test_attempt_and_ui_event_rows_serialize_with_merged_counts() -> None:
         provider="bedrock",
         provider_status=StatusClass.SERVER_ERROR,
         stream=True,
-        latency_ms=3000.0,
         deployment_hash="abc",
         latency_to_first_token_ms=200.0,
     )
@@ -37,7 +35,6 @@ def test_attempt_and_ui_event_rows_serialize_with_merged_counts() -> None:
         ui_events=((UIEvent(page="models", action=UIAction.CLICK, target="add_model"), 3),),
     )
 
-    latency: Final = Histogram.of(LATENCY_BOUNDS_MS, 40.0).merge(Histogram.of(LATENCY_BOUNDS_MS, 3000.0))
     first_token: Final = Histogram.of(LATENCY_BOUNDS_MS, 200.0)
     json_report: Final = report_to_json(report)
     assert isinstance(json_report, dict)
@@ -48,7 +45,6 @@ def test_attempt_and_ui_event_rows_serialize_with_merged_counts() -> None:
             "provider_status": "5xx",
             "stream": True,
             "attempt_count": 2,
-            "latency_ms": list(latency.counts),
             "latency_to_first_token_ms": list(first_token.counts),
         }
     ]

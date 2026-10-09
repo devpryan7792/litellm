@@ -94,7 +94,6 @@ def observe(
             if succeeded
             else StatusClass.from_status_code(_status_code(logged.error_information)),
             stream=stream,
-            latency_ms=(logged.endTime - logged.startTime) * 1000,
             deployment_hash=hash_deployment(logged.model_id) if logged.model_id else None,
             latency_to_first_token_ms=(first_token_s - logged.startTime) * 1000 if first_token_s is not None else None,
         ),
