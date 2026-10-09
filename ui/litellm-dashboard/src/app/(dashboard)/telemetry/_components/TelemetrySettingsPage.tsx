@@ -105,10 +105,7 @@ export default function TelemetrySettingsPage() {
             <Activity />
             Telemetry
           </PageHeaderTitle>
-          <PageHeaderDescription>
-            Off by default. Each switch adds aggregated counts, never prompts, responses, keys, ids or header values.
-            LITELLM_TELEMETRY_DISABLED=true turns everything off
-          </PageHeaderDescription>
+          <PageHeaderDescription>Choose which aggregated usage counts this proxy shares</PageHeaderDescription>
           <PageHeaderControls>
             <PageTabsList>
               <PageTabsTrigger value="proxy">Proxy requests</PageTabsTrigger>
@@ -130,6 +127,10 @@ export default function TelemetrySettingsPage() {
       <section className="space-y-1">
         <h3 className="font-medium">How and when it is sent</h3>
         <p className="text-xs text-muted-foreground">{destinationText(settings)}. Changes apply from the next window</p>
+        <p className="text-xs text-muted-foreground">
+          Off by default. Each switch adds aggregated counts, never prompts, responses, keys, ids or header values.
+          LITELLM_TELEMETRY_DISABLED=true turns everything off
+        </p>
       </section>
       <ReportPreview settings={settings} />
     </Page>
