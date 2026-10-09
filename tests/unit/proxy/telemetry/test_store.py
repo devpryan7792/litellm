@@ -90,9 +90,7 @@ async def test_without_an_endpoint_the_runtime_keeps_reports_locally_under_the_p
     assert runtime.store is not None
     assert runtime.sink is not None
     assert len(registered) == 1
-    runtime.sink.record_attempt(
-        AttemptRecord(provider="anthropic", provider_status=StatusClass.SUCCESS, stream=False, latency_ms=10.0)
-    )
+    runtime.sink.record_attempt(AttemptRecord(provider="anthropic", provider_status=StatusClass.SUCCESS, stream=False))
     await runtime.stop()
     stored: Final = tuple(args for query, args in db.executed if 'INSERT INTO "LiteLLM_TelemetryReport"' in query)
     assert len(stored) == 1
