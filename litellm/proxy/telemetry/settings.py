@@ -19,7 +19,7 @@ class TelemetrySettings(BaseSettings):
     disabled: bool = False
     groups: str | None = None
     endpoint: str | None = None
-    flush_interval_seconds: float = Field(default=60.0, gt=0)
+    flush_interval_seconds: float = Field(default=300.0, gt=0)
     settle_timeout_seconds: float = Field(default=2.0, ge=0)
 
 

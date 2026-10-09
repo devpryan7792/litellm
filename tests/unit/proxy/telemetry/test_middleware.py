@@ -123,12 +123,12 @@ async def test_a_retried_request_reports_the_serving_attempt_and_the_attempt_cou
     assert record.litellm_status is StatusClass.SUCCESS
     assert record.tokens == TokenCounts(input=12, output=3)
     assert record.stream is False
-    assert record.latency_to_first_token_ms is None
+    assert record.latency_to_first_byte_ms is not None
     assert {"anthropic-beta", "authorization"} <= record.header_keys
 
 
 @pytest.mark.asyncio
-async def test_a_stream_reports_time_to_headers_and_first_body_before_the_total() -> None:
+async def test_a_stream_reports_time_to_headers_before_the_first_byte() -> None:
     sink: Final = _RecordingSink()
     spawned: Final = _Spawned()
     async with _client(sink, spawned) as client:
@@ -139,8 +139,8 @@ async def test_a_stream_reports_time_to_headers_and_first_body_before_the_total(
     (record,) = sink.requests
     assert record.stream is True
     assert record.latency_to_headers_ms is not None
-    assert record.latency_to_first_token_ms is not None
-    assert record.latency_to_headers_ms < record.latency_to_first_token_ms < record.latency_total_ms
+    assert record.latency_to_first_byte_ms is not None
+    assert record.latency_to_headers_ms < record.latency_to_first_byte_ms
     assert (record.provider, record.provider_status, record.provider_attempts) == (None, StatusClass.NONE, 0)
 
 
