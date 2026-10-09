@@ -21,9 +21,8 @@ Spawn: TypeAlias = Callable[[Coroutine[None, None, None]], None]
 class ResponseTiming:
     status_code: int
     stream: bool
-    total_ms: float
     to_headers_ms: float | None
-    to_first_body_ms: float | None
+    to_first_byte_ms: float | None
     handled_by_rust: bool = False
 
 
@@ -40,7 +39,6 @@ def build_request_record(
         endpoint=endpoint,
         stream=timing.stream,
         litellm_status=StatusClass.from_status_code(timing.status_code),
-        latency_total_ms=timing.total_ms,
         provider=final.attempt.provider if final is not None else None,
         deployment_hash=final.attempt.deployment_hash if final is not None else None,
         provider_status=final.attempt.provider_status if final is not None else StatusClass.NONE,
@@ -50,7 +48,7 @@ def build_request_record(
         provider_attempts=sum(not observation.litellm_cache_hit for observation in observations),
         tokens=final.tokens if final is not None else TokenCounts(),
         latency_to_headers_ms=timing.to_headers_ms,
-        latency_to_first_token_ms=timing.to_first_body_ms if timing.stream else None,
+        latency_to_first_byte_ms=timing.to_first_byte_ms,
         blocks=final.blocks if final is not None else None,
         header_keys=header_keys,
     )
@@ -104,13 +102,11 @@ class _ResponseObserver:
                 pass
 
     def timing(self) -> ResponseTiming:
-        ended: Final = self._clock()
         return ResponseTiming(
             status_code=self.status_code,
             stream=self.stream,
-            total_ms=(ended - self.started) * 1000,
             to_headers_ms=_elapsed_ms(self.started, self.headers_at),
-            to_first_body_ms=_elapsed_ms(self.started, self.first_body_at),
+            to_first_byte_ms=_elapsed_ms(self.started, self.first_body_at),
             handled_by_rust=self.handled_by_rust,
         )
 

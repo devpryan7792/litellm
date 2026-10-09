@@ -107,7 +107,6 @@ class RequestRecord:
     endpoint: str
     stream: bool
     litellm_status: StatusClass
-    latency_total_ms: float
     provider: str | None = None
     deployment_hash: str | None = None
     provider_status: StatusClass = StatusClass.NONE
@@ -117,7 +116,7 @@ class RequestRecord:
     provider_attempts: int = 0
     tokens: TokenCounts = field(default_factory=TokenCounts)
     latency_to_headers_ms: float | None = None
-    latency_to_first_token_ms: float | None = None
+    latency_to_first_byte_ms: float | None = None
     blocks: BlockCounts | None = None
     header_keys: frozenset[str] = frozenset()
 

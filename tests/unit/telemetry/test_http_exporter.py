@@ -15,10 +15,9 @@ _RECORD: Final = RequestRecord(
     endpoint="/v1/messages",
     stream=True,
     litellm_status=StatusClass.SUCCESS,
-    latency_total_ms=300.0,
     provider="anthropic",
     provider_status=StatusClass.SUCCESS,
-    latency_to_first_token_ms=120.0,
+    latency_to_first_byte_ms=120.0,
 )
 _REPORT: Final = Report(
     instance=InstanceInfo(instance_id="i", litellm_version="1.2.3", groups=frozenset(TelemetryGroup)),
@@ -49,11 +48,6 @@ async def test_posts_the_report_as_json() -> None:
     assert request.headers["content-type"] == "application/json"
     assert json.loads(request.content) == {
         "schema_version": 1,
-        "histogram_bounds": {
-            "latency_ms": list(LATENCY_BOUNDS_MS),
-            "block_count": list(BLOCK_COUNT_BOUNDS),
-            "provider_attempts": list(ATTEMPT_BOUNDS),
-        },
         "instance": {
             "instance_id": "i",
             "litellm_version": "1.2.3",
@@ -82,9 +76,8 @@ async def test_posts_the_report_as_json() -> None:
                 "block_types": {},
                 "header_keys": {},
                 "provider_attempts": _histogram_json(ATTEMPT_BOUNDS, 0),
-                "latency_total_ms": _histogram_json(LATENCY_BOUNDS_MS, 3),
                 "latency_to_headers_ms": _histogram_json(LATENCY_BOUNDS_MS, None),
-                "latency_to_first_token_ms": _histogram_json(LATENCY_BOUNDS_MS, 2),
+                "latency_to_first_byte_ms": _histogram_json(LATENCY_BOUNDS_MS, 2),
             }
         ],
         "attempts": [],
