@@ -45,9 +45,7 @@ def _payload(error_information: Mapping[str, object] | None = None) -> Mapping[s
         "prompt_tokens": 30,
         "completion_tokens": 7,
         "cache_hit": None,
-        "metadata": {
-            "usage_object": {"prompt_tokens_details": {"cached_tokens": 20}, "cache_creation_input_tokens": 4}
-        },
+        "metadata": {"usage_object": {"prompt_tokens_details": {"cached_tokens": 20}}},
         "error_information": error_information,
     }
 
@@ -77,7 +75,7 @@ async def test_a_logged_stream_success_becomes_an_attempt_and_joins_the_in_fligh
     (observation,) = request.observations
     assert observation.attempt == expected
     assert observation.succeeded
-    assert observation.tokens == TokenCounts(input=30, output=7, cache_read=20, cache_write=4)
+    assert observation.tokens == TokenCounts(input=30, output=7, cache_read=20)
     assert observation.blocks == BlockCounts(total=1, by_type=((BlockType.TEXT, 1),))
 
 
