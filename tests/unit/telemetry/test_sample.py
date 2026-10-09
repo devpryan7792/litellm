@@ -12,7 +12,7 @@ _REQUEST_FIELDS: Final = {
         "endpoint",
         "litellm_status",
         "handled_by_rust",
-        "latency_total_ms",
+        "latency_to_first_byte_ms",
         "request_count",
     },
     TelemetryGroup.TOKEN_INFO: {"provider_cache_hit", "input_tokens", "cache_read_tokens"},
@@ -54,7 +54,7 @@ async def test_heartbeat_only_sample_is_just_the_instance_header() -> None:
         "schema_version": 1,
         "instance": {"instance_id": "0" * 32, "litellm_version": "2.0", "groups": ["heartbeat"]},
         "window_start": 0.0,
-        "window_end": 60.0,
+        "window_end": 300.0,
         "dropped_records": 0,
     }
 

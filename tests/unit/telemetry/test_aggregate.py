@@ -49,7 +49,7 @@ def _request(
         endpoint="/chat/completions",
         stream=False,
         litellm_status=StatusClass.SUCCESS,
-        latency_total_ms=latency_ms,
+        latency_to_first_byte_ms=latency_ms,
         provider=provider,
         provider_status=StatusClass.SUCCESS,
         provider_attempts=attempts,
@@ -81,11 +81,13 @@ async def test_requests_with_the_same_dimensions_fold_into_one_row() -> None:
     assert key == RequestKey.of(_request())
     assert metrics.request_count == 2
     assert metrics.tokens == TokenCounts(input=15, output=5, cache_read=11)
-    assert metrics.latency_total == Histogram.of(LATENCY_BOUNDS_MS, 80.0).merge(Histogram.of(LATENCY_BOUNDS_MS, 600.0))
+    assert metrics.latency_to_first_byte == Histogram.of(LATENCY_BOUNDS_MS, 80.0).merge(
+        Histogram.of(LATENCY_BOUNDS_MS, 600.0)
+    )
     assert metrics.provider_attempts == Histogram.of(ATTEMPT_BOUNDS, 1).merge(Histogram.of(ATTEMPT_BOUNDS, 2))
     assert metrics.block_types == ((BlockType.TEXT, 4),)
     assert metrics.header_keys == (("anthropic-beta", 2),)
-    assert metrics.latency_to_first_token.counts == (0,) * (len(LATENCY_BOUNDS_MS) + 1)
+    assert metrics.latency_to_headers.counts == (0,) * (len(LATENCY_BOUNDS_MS) + 1)
 
 
 @pytest.mark.asyncio
