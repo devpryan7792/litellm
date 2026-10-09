@@ -39,7 +39,7 @@ export const GROUP_COPY: Readonly<Record<TelemetryGroup, GroupCopy>> = {
   request_taxonomy: {
     title: "Request taxonomy",
     slices: "provider, salted deployment hash",
-    counts: "one row per provider attempt with its status and latency",
+    counts: "one row per provider attempt with its status",
     helps: "Which provider is failing, retries and fallbacks",
   },
   event_details: {
