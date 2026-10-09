@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Activity } from "lucide-react";
+import { Page, PageTabs, PageTabsContent, PageTabsList, PageTabsTrigger } from "@/components/shared/Page";
+import { PageHeader, PageHeaderControls, PageHeaderDescription, PageHeaderTitle } from "@/components/shared/PageHeader";
 import { useUrlTab } from "@/hooks/useUrlTab";
 import {
   type TelemetryGroup,
@@ -92,39 +94,44 @@ function ReportPreview({ settings }: { settings: TelemetrySettings }) {
 export default function TelemetrySettingsPage() {
   const [tab, setTab] = useUrlTab(TABS, "proxy");
   const { data: settings, isLoading, error } = useTelemetrySettings();
-  if (isLoading) return <div className="p-6">Loading telemetry settings...</div>;
+  if (isLoading) return <Page>Loading telemetry settings...</Page>;
   if (settings === undefined)
-    return <div className="p-6 text-destructive">Could not load telemetry settings: {error?.message}</div>;
+    return <Page className="text-destructive">Could not load telemetry settings: {error?.message}</Page>;
   return (
-    <div className="max-w-3xl space-y-5 p-6 text-sm">
-      <header className="space-y-1">
-        <h1 className="text-xl font-semibold">Telemetry</h1>
-        <p className="text-xs text-muted-foreground">
-          Off by default. Each switch adds aggregated counts, never prompts, responses, keys, ids or header values.
-          LITELLM_TELEMETRY_DISABLED=true turns everything off
-        </p>
-      </header>
-      <Tabs value={tab} onValueChange={(value) => setTab(value as (typeof TABS)[number])}>
-        <TabsList variant="line">
-          <TabsTrigger value="proxy">Proxy requests</TabsTrigger>
-          <TabsTrigger value="ui">Admin UI</TabsTrigger>
-        </TabsList>
-        <TabsContent value="proxy" className="space-y-4 pt-4">
+    <Page className="text-sm">
+      <PageTabs value={tab} onValueChange={(value) => setTab(value as (typeof TABS)[number])}>
+        <PageHeader>
+          <PageHeaderTitle>
+            <Activity />
+            Telemetry
+          </PageHeaderTitle>
+          <PageHeaderDescription>
+            Off by default. Each switch adds aggregated counts, never prompts, responses, keys, ids or header values.
+            LITELLM_TELEMETRY_DISABLED=true turns everything off
+          </PageHeaderDescription>
+          <PageHeaderControls>
+            <PageTabsList>
+              <PageTabsTrigger value="proxy">Proxy requests</PageTabsTrigger>
+              <PageTabsTrigger value="ui">Admin UI</PageTabsTrigger>
+            </PageTabsList>
+          </PageHeaderControls>
+        </PageHeader>
+        <PageTabsContent value="proxy" className="gap-4">
           <GroupList groups={PROXY_GROUPS} settings={settings} />
-        </TabsContent>
-        <TabsContent value="ui" className="space-y-4 pt-4">
+        </PageTabsContent>
+        <PageTabsContent value="ui" className="gap-4">
           <GroupList groups={UI_GROUPS} settings={settings} />
           <p className="text-xs text-muted-foreground">
             Sent only while Page navigation is on, to this proxy at POST /telemetry/ui_events, and counted into the same
             report as proxy traffic
           </p>
-        </TabsContent>
-      </Tabs>
+        </PageTabsContent>
+      </PageTabs>
       <section className="space-y-1">
         <h3 className="font-medium">How and when it is sent</h3>
         <p className="text-xs text-muted-foreground">{destinationText(settings)}. Changes apply from the next window</p>
       </section>
       <ReportPreview settings={settings} />
-    </div>
+    </Page>
   );
 }
