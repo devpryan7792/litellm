@@ -63,7 +63,7 @@ _REQUEST: Final = RequestRecord(
     handled_by_rust=True,
     provider_cache_hit=True,
     provider_attempts=2,
-    tokens=TokenCounts(input=10, output=5, cache_read=3, cache_write=1),
+    tokens=TokenCounts(input=10, output=5, cache_read=3),
     latency_to_headers_ms=20.0,
     latency_to_first_token_ms=40.0,
     blocks=BlockCounts(total=2, by_type=((BlockType.TEXT, 1), (BlockType.IMAGE, 1))),
@@ -146,6 +146,16 @@ async def test_request_taxonomy_adds_provider_deployment_and_attempt_rows() -> N
     assert (inner.requests[0].provider, inner.requests[0].deployment_hash) == ("openai", "d1")
     assert inner.attempts == (_ATTEMPT,)
     assert (inner.requests[0].blocks, inner.requests[0].header_keys) == (None, frozenset())
+
+
+@pytest.mark.asyncio
+async def test_request_taxonomy_without_token_info_keeps_the_provider_but_drops_tokens() -> None:
+    inner: Final = await _send_everything(
+        _consent(TelemetryGroup.HEARTBEAT, TelemetryGroup.REQUEST_SUCCESS, TelemetryGroup.REQUEST_TAXONOMY)
+    )
+    assert (inner.requests[0].provider, inner.requests[0].deployment_hash) == ("openai", "d1")
+    assert (inner.requests[0].tokens, inner.requests[0].provider_cache_hit) == (TokenCounts(), False)
+    assert inner.attempts == (_ATTEMPT,)
 
 
 @pytest.mark.asyncio

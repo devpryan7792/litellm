@@ -23,7 +23,7 @@ REQUIRES: Final[Mapping[TelemetryGroup, TelemetryGroup | None]] = MappingProxyTy
         TelemetryGroup.HEARTBEAT: None,
         TelemetryGroup.REQUEST_SUCCESS: TelemetryGroup.HEARTBEAT,
         TelemetryGroup.TOKEN_INFO: TelemetryGroup.REQUEST_SUCCESS,
-        TelemetryGroup.REQUEST_TAXONOMY: TelemetryGroup.TOKEN_INFO,
+        TelemetryGroup.REQUEST_TAXONOMY: TelemetryGroup.REQUEST_SUCCESS,
         TelemetryGroup.EVENT_DETAILS: TelemetryGroup.REQUEST_TAXONOMY,
         TelemetryGroup.INSTANCE_CONFIGURATION: TelemetryGroup.HEARTBEAT,
         TelemetryGroup.PAGE_NAVIGATION: TelemetryGroup.HEARTBEAT,
