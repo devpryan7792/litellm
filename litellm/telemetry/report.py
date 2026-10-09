@@ -66,9 +66,8 @@ class RequestMetrics:
     block_types: tuple[tuple[BlockType, int], ...]
     header_keys: tuple[tuple[str, int], ...]
     provider_attempts: Histogram
-    latency_total: Histogram
     latency_to_headers: Histogram
-    latency_to_first_token: Histogram
+    latency_to_first_byte: Histogram
 
     @classmethod
     def of(cls, record: RequestRecord) -> "RequestMetrics":
@@ -79,9 +78,8 @@ class RequestMetrics:
             block_types=add_counts((), () if record.blocks is None else record.blocks.by_type),
             header_keys=add_counts((), ((key, 1) for key in record.header_keys)),
             provider_attempts=Histogram.of(ATTEMPT_BOUNDS, record.provider_attempts),
-            latency_total=Histogram.of(LATENCY_BOUNDS_MS, record.latency_total_ms),
             latency_to_headers=Histogram.of(LATENCY_BOUNDS_MS, record.latency_to_headers_ms),
-            latency_to_first_token=Histogram.of(LATENCY_BOUNDS_MS, record.latency_to_first_token_ms),
+            latency_to_first_byte=Histogram.of(LATENCY_BOUNDS_MS, record.latency_to_first_byte_ms),
         )
 
     def merge(self, other: "RequestMetrics") -> "RequestMetrics":
@@ -96,9 +94,8 @@ class RequestMetrics:
             block_types=add_counts(self.block_types, other.block_types),
             header_keys=add_counts(self.header_keys, other.header_keys),
             provider_attempts=self.provider_attempts.merge(other.provider_attempts),
-            latency_total=self.latency_total.merge(other.latency_total),
             latency_to_headers=self.latency_to_headers.merge(other.latency_to_headers),
-            latency_to_first_token=self.latency_to_first_token.merge(other.latency_to_first_token),
+            latency_to_first_byte=self.latency_to_first_byte.merge(other.latency_to_first_byte),
         )
 
 
@@ -161,13 +158,6 @@ def _histogram_json(histogram: Histogram) -> JsonValue:
     return list(histogram.counts)
 
 
-_HISTOGRAM_BOUNDS: Final[Mapping[str, JsonValue]] = {
-    "latency_ms": list(LATENCY_BOUNDS_MS),
-    "block_count": list(BLOCK_COUNT_BOUNDS),
-    "provider_attempts": list(ATTEMPT_BOUNDS),
-}
-
-
 def _request_json(key: RequestKey, metrics: RequestMetrics, groups: frozenset[TelemetryGroup]) -> JsonValue:
     success: Final[Mapping[str, JsonValue]] = {
         "endpoint": key.endpoint,
@@ -178,9 +168,8 @@ def _request_json(key: RequestKey, metrics: RequestMetrics, groups: frozenset[Te
         "stream": key.stream,
         "request_count": metrics.request_count,
         "provider_attempts": _histogram_json(metrics.provider_attempts),
-        "latency_total_ms": _histogram_json(metrics.latency_total),
         "latency_to_headers_ms": _histogram_json(metrics.latency_to_headers),
-        "latency_to_first_token_ms": _histogram_json(metrics.latency_to_first_token),
+        "latency_to_first_byte_ms": _histogram_json(metrics.latency_to_first_byte),
     }
     tokens: Final[Mapping[str, JsonValue]] = {
         "provider_cache_hit": key.provider_cache_hit,
@@ -242,7 +231,6 @@ def report_to_json(report: Report) -> Mapping[str, JsonValue]:
     }
     return {
         "schema_version": report.schema_version,
-        **({"histogram_bounds": _HISTOGRAM_BOUNDS} if TelemetryGroup.REQUEST_SUCCESS in groups else {}),
         "instance": _instance_json(report.instance),
         "window_start": report.window_start,
         "window_end": report.window_end,

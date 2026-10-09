@@ -18,14 +18,13 @@ from litellm.telemetry.records import (
 from litellm.telemetry.report import Report
 from litellm.telemetry.sink import ExportOutcome
 
-SAMPLE_WINDOW_S: Final = 60.0
+SAMPLE_WINDOW_S: Final = 300.0
 
 _REQUESTS: Final = (
     RequestRecord(
         endpoint="/chat/completions",
         stream=True,
         litellm_status=StatusClass.SUCCESS,
-        latency_total_ms=1800.0,
         provider="openai",
         deployment_hash="3f9a1c0d2b7e4a61",
         provider_status=StatusClass.SUCCESS,
@@ -33,7 +32,7 @@ _REQUESTS: Final = (
         provider_attempts=1,
         tokens=TokenCounts(input=1200, output=340, cache_read=1024),
         latency_to_headers_ms=210.0,
-        latency_to_first_token_ms=420.0,
+        latency_to_first_byte_ms=420.0,
         blocks=BlockCounts(total=3, by_type=((BlockType.TEXT, 2), (BlockType.IMAGE, 1))),
         header_keys=frozenset({"x-stainless-lang", "x-request-id"}),
     ),
@@ -41,13 +40,13 @@ _REQUESTS: Final = (
         endpoint="/messages",
         stream=False,
         litellm_status=StatusClass.SERVER_ERROR,
-        latency_total_ms=9200.0,
         provider="anthropic",
         deployment_hash="8c2e5b9f01d34a77",
         provider_status=StatusClass.SERVER_ERROR,
         handled_by_rust=True,
         provider_attempts=3,
         latency_to_headers_ms=9150.0,
+        latency_to_first_byte_ms=9180.0,
         blocks=BlockCounts(total=2, by_type=((BlockType.TEXT, 1), (BlockType.TOOL_RESULT, 1))),
         header_keys=frozenset({"anthropic-version", "anthropic-beta"}),
     ),
