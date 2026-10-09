@@ -67,7 +67,6 @@ async def test_a_logged_stream_success_becomes_an_attempt_and_joins_the_in_fligh
         provider="anthropic",
         provider_status=StatusClass.SUCCESS,
         stream=True,
-        latency_ms=1500.0,
         deployment_hash="h(deployment-1)",
         latency_to_first_token_ms=250.0,
     )
