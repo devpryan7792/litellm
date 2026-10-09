@@ -25,6 +25,7 @@ pub(crate) fn prepare_request(
         | LlmProviders::AwsTextract
         | LlmProviders::Bedrock
         | LlmProviders::Cohere
+        | LlmProviders::Deepseek
         | LlmProviders::Openai
         | LlmProviders::OpenaiLike
         | LlmProviders::Reducto

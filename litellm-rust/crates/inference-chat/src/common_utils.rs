@@ -36,6 +36,7 @@ pub(super) fn chat_completions_provider(provider: LlmProviders) -> Option<ChatPr
         LlmProviders::AwsTextract
         | LlmProviders::AzureAi
         | LlmProviders::Cohere
+        | LlmProviders::Deepseek
         | LlmProviders::Mistral
         | LlmProviders::Openai
         | LlmProviders::Reducto
