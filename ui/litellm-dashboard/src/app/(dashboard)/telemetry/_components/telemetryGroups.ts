@@ -2,7 +2,8 @@ import type { TelemetryGroup } from "@/app/(dashboard)/hooks/telemetry/useTeleme
 
 export interface GroupCopy {
   readonly title: string;
-  readonly sends: string;
+  readonly slices?: string;
+  readonly counts: string;
   readonly helps: string;
 }
 
@@ -20,43 +21,41 @@ export const UI_GROUPS: readonly TelemetryGroup[] = ["page_navigation"];
 export const GROUP_COPY: Readonly<Record<TelemetryGroup, GroupCopy>> = {
   heartbeat: {
     title: "Heartbeat",
-    sends: "A random instance id, the LiteLLM version, the report window start and end, and which groups are on.",
-    helps: "Tells us which versions are running, so we know who a bug fix or a deprecation affects.",
+    counts: "Random instance id, LiteLLM version, report window, which groups are on",
+    helps: "Which versions are running",
   },
   request_success: {
     title: "Request success",
-    sends:
-      "Per endpoint (e.g. /chat/completions): request count, LiteLLM and provider status class (2xx/4xx/5xx), stream yes/no, LiteLLM cache hit, whether the Rust gateway handled it, provider attempts, and latency histograms for total time, time to response headers and time to first token.",
-    helps: "Lets us catch error-rate and latency regressions in a release, and compare the Rust gateway with Python.",
+    slices: "endpoint, LiteLLM status, provider status, stream, handled by Rust, LiteLLM cache hit",
+    counts: "requests, provider attempts, latency to headers, first chunk and end of response",
+    helps: "Error-rate and latency regressions, Rust vs Python",
   },
   token_info: {
     title: "Token info",
-    sends:
-      "Input, output, cache read and cache write token sums per row, and provider prompt-cache hit yes/no. Never per request.",
-    helps: "Shows when a change breaks provider prompt caching or token counting.",
+    slices: "provider prompt-cache hit",
+    counts: "input, output and cache-read token sums",
+    helps: "Broken prompt caching or token counting",
   },
   request_taxonomy: {
     title: "Request taxonomy",
-    sends:
-      "The provider (e.g. anthropic) and a salted hash of the deployment id on each row, plus one row per provider attempt.",
-    helps: "Turns 'errors went up' into 'errors went up for one provider', and shows retries and fallbacks.",
+    slices: "provider, salted deployment hash",
+    counts: "one row per provider attempt with its status and latency",
+    helps: "Which provider is failing, retries and fallbacks",
   },
   event_details: {
     title: "Event details",
-    sends:
-      "Message block counts and block types (text, image, tool_use, ...), allowlisted request header names (never values), and provider time to first token per attempt.",
-    helps: "Shows which request shapes and client tools fail, so we can test the ones people actually send.",
+    counts: "message block counts and types, allowlisted header names (no values), provider time to first token",
+    helps: "Which request shapes and clients fail",
   },
   instance_configuration: {
     title: "Instance configuration",
-    sends: "Names of allowlisted config keys that are set. Never their values.",
-    helps: "Shows which features are configured, so we know what an upgrade must keep working.",
+    counts: "names of allowlisted config keys that are set (no values)",
+    helps: "Which features an upgrade must keep working",
   },
   page_navigation: {
     title: "Page navigation",
-    sends:
-      "Admin UI page views and tab switches as route names (e.g. models-and-endpoints, tab=health). No ids, names or text you type.",
-    helps: "Shows which pages and tabs people use, so we can focus UI work on them.",
+    counts: "Admin UI page views and tab switches by route name (no ids or typed text)",
+    helps: "Which pages and tabs get used",
   },
 };
 
@@ -66,6 +65,12 @@ const dependents = (group: TelemetryGroup, requires: Requires): readonly Telemet
   [...requires.entries()]
     .filter(([, parent]) => parent === group)
     .flatMap(([child]) => [child, ...dependents(child, requires)]);
+
+/** How many groups sit above this one, heartbeat being 0 */
+export const depthOf = (group: TelemetryGroup, requires: Requires): number => {
+  const parent = requires.get(group) ?? null;
+  return parent === null ? 0 : 1 + depthOf(parent, requires);
+};
 
 export const canEnable = (group: TelemetryGroup, enabled: ReadonlySet<TelemetryGroup>, requires: Requires): boolean => {
   const parent = requires.get(group) ?? null;
