@@ -158,13 +158,6 @@ def _histogram_json(histogram: Histogram) -> JsonValue:
     return list(histogram.counts)
 
 
-_HISTOGRAM_BOUNDS: Final[Mapping[str, JsonValue]] = {
-    "latency_ms": list(LATENCY_BOUNDS_MS),
-    "block_count": list(BLOCK_COUNT_BOUNDS),
-    "provider_attempts": list(ATTEMPT_BOUNDS),
-}
-
-
 def _request_json(key: RequestKey, metrics: RequestMetrics, groups: frozenset[TelemetryGroup]) -> JsonValue:
     success: Final[Mapping[str, JsonValue]] = {
         "endpoint": key.endpoint,
@@ -238,7 +231,6 @@ def report_to_json(report: Report) -> Mapping[str, JsonValue]:
     }
     return {
         "schema_version": report.schema_version,
-        **({"histogram_bounds": _HISTOGRAM_BOUNDS} if TelemetryGroup.REQUEST_SUCCESS in groups else {}),
         "instance": _instance_json(report.instance),
         "window_start": report.window_start,
         "window_end": report.window_end,
