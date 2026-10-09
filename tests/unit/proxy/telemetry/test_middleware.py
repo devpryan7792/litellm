@@ -60,7 +60,7 @@ class _Clock:
 
 def _attempt(provider: str, status: StatusClass, *, succeeded: bool, tokens: TokenCounts) -> AttemptObservation:
     return AttemptObservation(
-        attempt=AttemptRecord(provider=provider, provider_status=status, stream=False, latency_ms=10.0),
+        attempt=AttemptRecord(provider=provider, provider_status=status, stream=False),
         succeeded=succeeded,
         tokens=tokens,
     )

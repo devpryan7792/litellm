@@ -56,7 +56,6 @@ _ATTEMPTS: Final = (
         provider="openai",
         provider_status=StatusClass.SUCCESS,
         stream=True,
-        latency_ms=1750.0,
         deployment_hash="3f9a1c0d2b7e4a61",
         latency_to_first_token_ms=380.0,
     ),
@@ -65,7 +64,6 @@ _ATTEMPTS: Final = (
             provider="anthropic",
             provider_status=StatusClass.SERVER_ERROR,
             stream=False,
-            latency_ms=3000.0,
             deployment_hash="8c2e5b9f01d34a77",
         )
         for _ in range(3)
