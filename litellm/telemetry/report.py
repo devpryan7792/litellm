@@ -119,21 +119,18 @@ class AttemptKey:
 @dataclass(frozen=True, slots=True)
 class AttemptMetrics:
     attempt_count: int
-    latency: Histogram
     latency_to_first_token: Histogram
 
     @classmethod
     def of(cls, record: AttemptRecord) -> "AttemptMetrics":
         return cls(
             attempt_count=1,
-            latency=Histogram.of(LATENCY_BOUNDS_MS, record.latency_ms),
             latency_to_first_token=Histogram.of(LATENCY_BOUNDS_MS, record.latency_to_first_token_ms),
         )
 
     def merge(self, other: "AttemptMetrics") -> "AttemptMetrics":
         return AttemptMetrics(
             attempt_count=self.attempt_count + other.attempt_count,
-            latency=self.latency.merge(other.latency),
             latency_to_first_token=self.latency_to_first_token.merge(other.latency_to_first_token),
         )
 
@@ -198,7 +195,6 @@ def _attempt_json(key: AttemptKey, metrics: AttemptMetrics) -> JsonValue:
         "provider_status": _enum_value(key.provider_status),
         "stream": key.stream,
         "attempt_count": metrics.attempt_count,
-        "latency_ms": _histogram_json(metrics.latency),
         "latency_to_first_token_ms": _histogram_json(metrics.latency_to_first_token),
     }
 
