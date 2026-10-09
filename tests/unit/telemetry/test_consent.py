@@ -55,7 +55,6 @@ _REQUEST: Final = RequestRecord(
     endpoint="/chat/completions",
     stream=True,
     litellm_status=StatusClass.SUCCESS,
-    latency_total_ms=120.0,
     provider="openai",
     deployment_hash="d1",
     provider_status=StatusClass.SUCCESS,
@@ -65,7 +64,7 @@ _REQUEST: Final = RequestRecord(
     provider_attempts=2,
     tokens=TokenCounts(input=10, output=5, cache_read=3),
     latency_to_headers_ms=20.0,
-    latency_to_first_token_ms=40.0,
+    latency_to_first_byte_ms=40.0,
     blocks=BlockCounts(total=2, by_type=((BlockType.TEXT, 1), (BlockType.IMAGE, 1))),
     header_keys=frozenset({"Anthropic-Beta", "authorization", "x-customer-secret"}),
 )
@@ -73,13 +72,12 @@ _SUCCESS_ONLY: Final = RequestRecord(
     endpoint="/chat/completions",
     stream=True,
     litellm_status=StatusClass.SUCCESS,
-    latency_total_ms=120.0,
     provider_status=StatusClass.SUCCESS,
     litellm_cache_hit=True,
     handled_by_rust=True,
     provider_attempts=2,
     latency_to_headers_ms=20.0,
-    latency_to_first_token_ms=40.0,
+    latency_to_first_byte_ms=40.0,
 )
 _ATTEMPT: Final = AttemptRecord(provider="openai", provider_status=StatusClass.SUCCESS, stream=True, latency_ms=100.0)
 _INSTANCE: Final = InstanceInfo(instance_id="abc", litellm_version="1.0.0", config_keys=frozenset({"cache"}))
@@ -184,7 +182,6 @@ def test_only_allowlisted_header_keys_adds_no_other_key() -> None:
             endpoint="/v1/messages",
             stream=False,
             litellm_status=StatusClass.SUCCESS,
-            latency_total_ms=1.0,
             header_keys=frozenset({"anthropic-version"}),
         )
     )
