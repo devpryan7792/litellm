@@ -30,7 +30,6 @@ class _Usage(BaseModel):
 
     prompt_tokens_details: _PromptTokensDetails | None = None
     cache_read_input_tokens: int | None = None
-    cache_creation_input_tokens: int | None = None
 
 
 class _Metadata(BaseModel):
@@ -75,20 +74,18 @@ def _status_code(error: _ErrorInformation | None) -> int | None:
     return int(code) if code is not None and code.isdigit() else None
 
 
-def _cache_tokens(metadata: _Metadata | None) -> tuple[int, int]:
+def _cache_read_tokens(metadata: _Metadata | None) -> int:
     usage: Final = metadata.usage_object if metadata is not None else None
     if usage is None:
-        return 0, 0
+        return 0
     details: Final = usage.prompt_tokens_details
-    read: Final = (details.cached_tokens if details is not None else None) or usage.cache_read_input_tokens or 0
-    return read, usage.cache_creation_input_tokens or 0
+    return (details.cached_tokens if details is not None else None) or usage.cache_read_input_tokens or 0
 
 
 def observe(
     logged: _LoggedAttempt, *, succeeded: bool, messages: object, hash_deployment: DeploymentHasher
 ) -> AttemptObservation:
     stream: Final = logged.stream is True
-    cache_read, cache_write = _cache_tokens(logged.metadata)
     first_token_s: Final = logged.completionStartTime if stream and succeeded else None
     return AttemptObservation(
         attempt=AttemptRecord(
@@ -103,7 +100,9 @@ def observe(
         ),
         succeeded=succeeded,
         tokens=TokenCounts(
-            input=logged.prompt_tokens, output=logged.completion_tokens, cache_read=cache_read, cache_write=cache_write
+            input=logged.prompt_tokens,
+            output=logged.completion_tokens,
+            cache_read=_cache_read_tokens(logged.metadata),
         ),
         litellm_cache_hit=logged.cache_hit is True,
         blocks=count_blocks(messages),

@@ -48,8 +48,8 @@ def test_attempt_and_ui_event_rows_serialize_with_merged_counts() -> None:
             "provider_status": "5xx",
             "stream": True,
             "attempt_count": 2,
-            "latency_ms": {"bounds": list(LATENCY_BOUNDS_MS), "counts": list(latency.counts)},
-            "latency_to_first_token_ms": {"bounds": list(LATENCY_BOUNDS_MS), "counts": list(first_token.counts)},
+            "latency_ms": list(latency.counts),
+            "latency_to_first_token_ms": list(first_token.counts),
         }
     ]
     assert json_report["ui_events"] == [{"page": "models", "action": "click", "target": "add_model", "count": 3}]

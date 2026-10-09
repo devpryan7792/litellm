@@ -91,7 +91,6 @@ class RequestMetrics:
                 input=self.tokens.input + other.tokens.input,
                 output=self.tokens.output + other.tokens.output,
                 cache_read=self.tokens.cache_read + other.tokens.cache_read,
-                cache_write=self.tokens.cache_write + other.tokens.cache_write,
             ),
             block_count=self.block_count.merge(other.block_count),
             block_types=add_counts(self.block_types, other.block_types),
@@ -159,7 +158,14 @@ def _enum_value(value: StatusClass | BlockType | UIAction | TelemetryGroup) -> s
 
 
 def _histogram_json(histogram: Histogram) -> JsonValue:
-    return {"bounds": list(histogram.bounds), "counts": list(histogram.counts)}
+    return list(histogram.counts)
+
+
+_HISTOGRAM_BOUNDS: Final[Mapping[str, JsonValue]] = {
+    "latency_ms": list(LATENCY_BOUNDS_MS),
+    "block_count": list(BLOCK_COUNT_BOUNDS),
+    "provider_attempts": list(ATTEMPT_BOUNDS),
+}
 
 
 def _request_json(key: RequestKey, metrics: RequestMetrics, groups: frozenset[TelemetryGroup]) -> JsonValue:
@@ -181,7 +187,6 @@ def _request_json(key: RequestKey, metrics: RequestMetrics, groups: frozenset[Te
         "input_tokens": metrics.tokens.input,
         "output_tokens": metrics.tokens.output,
         "cache_read_tokens": metrics.tokens.cache_read,
-        "cache_write_tokens": metrics.tokens.cache_write,
     }
     taxonomy: Final[Mapping[str, JsonValue]] = {"provider": key.provider, "deployment_hash": key.deployment_hash}
     details: Final[Mapping[str, JsonValue]] = {
@@ -237,6 +242,7 @@ def report_to_json(report: Report) -> Mapping[str, JsonValue]:
     }
     return {
         "schema_version": report.schema_version,
+        **({"histogram_bounds": _HISTOGRAM_BOUNDS} if TelemetryGroup.REQUEST_SUCCESS in groups else {}),
         "instance": _instance_json(report.instance),
         "window_start": report.window_start,
         "window_end": report.window_end,
