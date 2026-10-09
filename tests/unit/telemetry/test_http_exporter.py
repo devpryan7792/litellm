@@ -28,8 +28,8 @@ _REPORT: Final = Report(
 )
 
 
-def _histogram_json(bounds: tuple[float, ...], hit_index: int | None) -> Mapping[str, Sequence[float]]:
-    return {"bounds": list(bounds), "counts": [int(index == hit_index) for index in range(len(bounds) + 1)]}
+def _histogram_json(bounds: tuple[float, ...], hit_index: int | None) -> Sequence[int]:
+    return [int(index == hit_index) for index in range(len(bounds) + 1)]
 
 
 @pytest.mark.asyncio
@@ -49,6 +49,11 @@ async def test_posts_the_report_as_json() -> None:
     assert request.headers["content-type"] == "application/json"
     assert json.loads(request.content) == {
         "schema_version": 1,
+        "histogram_bounds": {
+            "latency_ms": list(LATENCY_BOUNDS_MS),
+            "block_count": list(BLOCK_COUNT_BOUNDS),
+            "provider_attempts": list(ATTEMPT_BOUNDS),
+        },
         "instance": {
             "instance_id": "i",
             "litellm_version": "1.2.3",
@@ -73,7 +78,6 @@ async def test_posts_the_report_as_json() -> None:
                 "input_tokens": 0,
                 "output_tokens": 0,
                 "cache_read_tokens": 0,
-                "cache_write_tokens": 0,
                 "block_count": _histogram_json(BLOCK_COUNT_BOUNDS, None),
                 "block_types": {},
                 "header_keys": {},

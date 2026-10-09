@@ -86,7 +86,6 @@ class TokenCounts:
     input: int = 0
     output: int = 0
     cache_read: int = 0
-    cache_write: int = 0
 
 
 @dataclass(frozen=True, slots=True)
