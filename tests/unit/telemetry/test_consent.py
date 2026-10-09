@@ -79,7 +79,7 @@ _SUCCESS_ONLY: Final = RequestRecord(
     latency_to_headers_ms=20.0,
     latency_to_first_byte_ms=40.0,
 )
-_ATTEMPT: Final = AttemptRecord(provider="openai", provider_status=StatusClass.SUCCESS, stream=True, latency_ms=100.0)
+_ATTEMPT: Final = AttemptRecord(provider="openai", provider_status=StatusClass.SUCCESS, stream=True)
 _INSTANCE: Final = InstanceInfo(instance_id="abc", litellm_version="1.0.0", config_keys=frozenset({"cache"}))
 _UI_EVENT: Final = UIEvent(page="models", action=UIAction.VIEW)
 
