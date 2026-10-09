@@ -126,7 +126,6 @@ class AttemptRecord:
     provider: str
     provider_status: StatusClass
     stream: bool
-    latency_ms: float
     deployment_hash: str | None = None
     latency_to_first_token_ms: float | None = None
 

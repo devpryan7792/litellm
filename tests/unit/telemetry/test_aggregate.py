@@ -113,9 +113,7 @@ async def test_a_retryable_export_failure_carries_the_window_into_the_next_repor
     clock: Final = _Clock()
     sink: Final = _sink(exporter, clock)
     sink.record_request(_request())
-    sink.record_attempt(
-        AttemptRecord(provider="openai", provider_status=StatusClass.SUCCESS, stream=False, latency_ms=1)
-    )
+    sink.record_attempt(AttemptRecord(provider="openai", provider_status=StatusClass.SUCCESS, stream=False))
     sink.record_ui_event(UIEvent(page="models", action=UIAction.VIEW))
     await sink.flush()
     sink.record_request(_request())
@@ -147,9 +145,7 @@ async def test_new_rows_past_the_cap_are_dropped_and_counted_but_existing_rows_k
     sink: Final = _sink(exporter, _Clock(), max_rows=1)
     sink.record_request(_request(provider="openai"))
     sink.record_request(_request(provider="anthropic"))
-    sink.record_attempt(
-        AttemptRecord(provider="openai", provider_status=StatusClass.SUCCESS, stream=False, latency_ms=1)
-    )
+    sink.record_attempt(AttemptRecord(provider="openai", provider_status=StatusClass.SUCCESS, stream=False))
     sink.record_request(_request(provider="openai"))
     await sink.flush()
 
