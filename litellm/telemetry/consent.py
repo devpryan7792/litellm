@@ -36,7 +36,12 @@ class TelemetryConsent:
     groups: frozenset[TelemetryGroup] = frozenset()
 
     def allows(self, group: TelemetryGroup) -> bool:
-        return group in self.groups
+        required: Final = REQUIRES[group]
+        return group in self.groups and (required is None or self.allows(required))
+
+    @property
+    def effective_groups(self) -> frozenset[TelemetryGroup]:
+        return frozenset(group for group in self.groups if self.allows(group))
 
 
 OFF: Final = TelemetryConsent()
@@ -120,7 +125,9 @@ class ConsentGatedSink:
         configuration: Final = self.consent.allows(TelemetryGroup.INSTANCE_CONFIGURATION)
         self._inner.set_instance(
             dataclasses.replace(
-                info, groups=self.consent.groups, config_keys=info.config_keys if configuration else frozenset()
+                info,
+                groups=self.consent.effective_groups,
+                config_keys=info.config_keys if configuration else frozenset(),
             )
         )
 
