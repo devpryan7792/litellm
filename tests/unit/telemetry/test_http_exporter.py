@@ -48,11 +48,6 @@ async def test_posts_the_report_as_json() -> None:
     assert request.headers["content-type"] == "application/json"
     assert json.loads(request.content) == {
         "schema_version": 1,
-        "histogram_bounds": {
-            "latency_ms": list(LATENCY_BOUNDS_MS),
-            "block_count": list(BLOCK_COUNT_BOUNDS),
-            "provider_attempts": list(ATTEMPT_BOUNDS),
-        },
         "instance": {
             "instance_id": "i",
             "litellm_version": "1.2.3",
