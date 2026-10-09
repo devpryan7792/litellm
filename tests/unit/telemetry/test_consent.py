@@ -124,6 +124,24 @@ async def test_heartbeat_alone_sends_only_the_instance_header() -> None:
 
 
 @pytest.mark.asyncio
+async def test_a_directly_built_consent_missing_its_heartbeat_forwards_nothing() -> None:
+    assert await _send_everything(TelemetryConsent(frozenset({TelemetryGroup.REQUEST_SUCCESS}))) == _RecordingSink()
+
+
+@pytest.mark.asyncio
+async def test_a_directly_built_consent_skipping_a_middle_group_reports_and_forwards_only_the_connected_groups() -> (
+    None
+):
+    inner: Final = await _send_everything(
+        TelemetryConsent(frozenset({TelemetryGroup.HEARTBEAT, TelemetryGroup.EVENT_DETAILS}))
+    )
+    assert inner == _RecordingSink(
+        instances=(InstanceInfo(instance_id="abc", litellm_version="1.0.0", groups=frozenset(_CHAIN[:1])),),
+        flushes=1,
+    )
+
+
+@pytest.mark.asyncio
 async def test_request_success_keeps_status_endpoint_and_latency_but_no_tokens_provider_or_details() -> None:
     inner: Final = await _send_everything(_consent(*_CHAIN[:2]))
     assert inner.requests == (_SUCCESS_ONLY,)
