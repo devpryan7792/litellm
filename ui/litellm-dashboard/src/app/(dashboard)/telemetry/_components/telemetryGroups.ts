@@ -27,7 +27,7 @@ export const GROUP_COPY: Readonly<Record<TelemetryGroup, GroupCopy>> = {
   request_success: {
     title: "Request success",
     slices: "endpoint, LiteLLM status, provider status, stream, handled by Rust, LiteLLM cache hit",
-    counts: "requests, provider attempts, latency to headers, first chunk and end of response",
+    counts: "requests, provider attempts, latency to headers and to first byte",
     helps: "Error-rate and latency regressions, Rust vs Python",
   },
   token_info: {
@@ -72,19 +72,19 @@ export const depthOf = (group: TelemetryGroup, requires: Requires): number => {
   return parent === null ? 0 : 1 + depthOf(parent, requires);
 };
 
-export const canEnable = (group: TelemetryGroup, enabled: ReadonlySet<TelemetryGroup>, requires: Requires): boolean => {
+const withAncestors = (group: TelemetryGroup, requires: Requires): readonly TelemetryGroup[] => {
   const parent = requires.get(group) ?? null;
-  return parent === null || enabled.has(parent);
+  return parent === null ? [group] : [group, ...withAncestors(parent, requires)];
 };
 
-/** Turning a group off also turns off every group that depends on it; turning one on needs its parent on */
+/** Turning a group on also turns on every group it builds on; turning one off also turns off every group built on it */
 export const toggleGroup = (
   group: TelemetryGroup,
   on: boolean,
   enabled: ReadonlySet<TelemetryGroup>,
   requires: Requires,
 ): ReadonlySet<TelemetryGroup> => {
-  if (on) return canEnable(group, enabled, requires) ? new Set([...enabled, group]) : enabled;
+  if (on) return new Set([...enabled, ...withAncestors(group, requires)]);
   const removed = new Set([group, ...dependents(group, requires)]);
   return new Set([...enabled].filter((g) => !removed.has(g)));
 };

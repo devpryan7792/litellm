@@ -10,7 +10,7 @@ import {
   useTelemetrySettings,
   useUpdateTelemetrySettings,
 } from "@/app/(dashboard)/hooks/telemetry/useTelemetrySettings";
-import { GROUP_COPY, PROXY_GROUPS, UI_GROUPS, canEnable, depthOf, toggleGroup, type Requires } from "./telemetryGroups";
+import { GROUP_COPY, PROXY_GROUPS, UI_GROUPS, depthOf, toggleGroup, type Requires } from "./telemetryGroups";
 
 const TABS = ["proxy", "ui"] as const;
 
@@ -39,10 +39,7 @@ function GroupList({ groups, settings }: { groups: readonly TelemetryGroup[]; se
     <ul className="divide-y rounded-md border">
       {groups.map((group) => {
         const copy = GROUP_COPY[group];
-        const parent = requires.get(group) ?? null;
-        const available = canEnable(group, enabled, requires);
         const locked = !settings.editable || update.isPending;
-        const blocked = !available && !enabled.has(group);
         const depth = depthOf(group, requires) - (groups.includes("heartbeat") ? 0 : 1);
         return (
           <li
@@ -55,18 +52,11 @@ function GroupList({ groups, settings }: { groups: readonly TelemetryGroup[]; se
               size="sm"
               aria-label={copy.title}
               checked={enabled.has(group)}
-              disabled={locked || blocked}
+              disabled={locked}
               onCheckedChange={(on) => onToggle(group, on)}
             />
             <div className="space-y-0.5 text-xs text-muted-foreground">
-              <div className="text-sm font-medium text-foreground">
-                {copy.title}
-                {parent !== null && !available && (
-                  <span className="ml-2 text-xs font-normal text-muted-foreground">
-                    needs {GROUP_COPY[parent].title}
-                  </span>
-                )}
-              </div>
+              <div className="text-sm font-medium text-foreground">{copy.title}</div>
               {copy.slices !== undefined && <p>Slices by: {copy.slices}</p>}
               <p>
                 {copy.slices !== undefined ? "Counts" : "Sends"}: {copy.counts}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { TelemetryGroup } from "@/app/(dashboard)/hooks/telemetry/useTelemetrySettings";
-import { canEnable, depthOf, toggleGroup, type Requires } from "./telemetryGroups";
+import { depthOf, toggleGroup, type Requires } from "./telemetryGroups";
 
 const REQUIRES: Requires = new Map<TelemetryGroup, TelemetryGroup | null>([
   ["heartbeat", null],
@@ -35,12 +35,12 @@ describe("toggleGroup", () => {
     );
   });
 
-  it("a group cannot be turned on before the group it needs", () => {
-    const heartbeatOnly = new Set<TelemetryGroup>(["heartbeat"]);
-    expect(canEnable("token_info", heartbeatOnly, REQUIRES)).toBe(false);
-    expect(toggleGroup("token_info", true, heartbeatOnly, REQUIRES)).toBe(heartbeatOnly);
-    expect(toggleGroup("request_success", true, heartbeatOnly, REQUIRES)).toEqual(
-      new Set(["heartbeat", "request_success"]),
+  it("turning a nested group on also turns on every group it builds on", () => {
+    expect(toggleGroup("event_details", true, new Set(), REQUIRES)).toEqual(
+      new Set(["heartbeat", "request_success", "request_taxonomy", "event_details"]),
+    );
+    expect(toggleGroup("token_info", true, new Set(["heartbeat", "instance_configuration"]), REQUIRES)).toEqual(
+      new Set(["heartbeat", "instance_configuration", "request_success", "token_info"]),
     );
   });
 });
