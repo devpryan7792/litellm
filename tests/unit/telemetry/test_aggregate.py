@@ -71,7 +71,7 @@ async def test_requests_with_the_same_dimensions_fold_into_one_row() -> None:
     clock: Final = _Clock()
     sink: Final = _sink(exporter, clock)
     sink.record_request(_request(latency_ms=80.0, tokens=TokenCounts(input=10, output=3, cache_read=4), attempts=1))
-    sink.record_request(_request(latency_ms=600.0, tokens=TokenCounts(input=5, output=2, cache_write=7), attempts=2))
+    sink.record_request(_request(latency_ms=600.0, tokens=TokenCounts(input=5, output=2, cache_read=7), attempts=2))
     clock.now = 1060.0
     await sink.flush()
 
@@ -80,7 +80,7 @@ async def test_requests_with_the_same_dimensions_fold_into_one_row() -> None:
     ((key, metrics),) = report.requests
     assert key == RequestKey.of(_request())
     assert metrics.request_count == 2
-    assert metrics.tokens == TokenCounts(input=15, output=5, cache_read=4, cache_write=7)
+    assert metrics.tokens == TokenCounts(input=15, output=5, cache_read=11)
     assert metrics.latency_total == Histogram.of(LATENCY_BOUNDS_MS, 80.0).merge(Histogram.of(LATENCY_BOUNDS_MS, 600.0))
     assert metrics.provider_attempts == Histogram.of(ATTEMPT_BOUNDS, 1).merge(Histogram.of(ATTEMPT_BOUNDS, 2))
     assert metrics.block_types == ((BlockType.TEXT, 4),)
